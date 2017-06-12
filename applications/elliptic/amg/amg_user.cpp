@@ -37,6 +37,41 @@ void amg_link_solvers(fclaw2d_global_t *glob)
 }
 
 
+void cb_fill_patches(fclaw2d_global_t* glob, 
+                     fclaw2d_patch_t* this_patch,
+                    int this_block_idx,
+                    int this_patch_idx,
+                    void *user)
+{
+    double* q = (double*) user;
+
+    int patch_num, level;
+
+    fclaw2d_patch_get_info(glob->domain,
+                           this_patch, this_block_idx, this_patch_idx,
+                           &patch_num, &level);
+
+    /* Figure location in q for patchdata */
+
+    /* Call fortran routine which fills in patch data into "this_patch" */
+}
+
+void amg_compute_residual(fclaw2d_global_t *glob, double * q, double *r)
+{
+    /* Iterate over all patches to fill patches with data from q */
+
+    /* Call ghost_fill to fill all ghost cells */
+
+    /* Iterate over patches to compute residual r = b - A*x
+
+    This will require that we define our right hand side f 
+
+    Return residual in *r */
+
+
+}
+
+
 
 
 
