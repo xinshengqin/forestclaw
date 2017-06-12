@@ -60,6 +60,9 @@ endif
 #  available
 # ----------------------------------------------------
 
+# PETSc problem using AMG
+include applications/elliptic/amg/Makefile.am
+
 # Third order scalar advection
 #include applications/advection/2d/adv_order3/Makefile.am
 
