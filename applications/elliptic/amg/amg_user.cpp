@@ -56,6 +56,27 @@ void cb_fill_patches(fclaw2d_global_t* glob,
     /* Call fortran routine which fills in patch data into "this_patch" */
 }
 
+void cb_compute_residual(fclaw2d_global_t* glob, 
+                         fclaw2d_patch_t* this_patch,
+                         int this_block_idx,
+                         int this_patch_idx,
+                         void *user)
+{
+    double* r = (double*) user;
+
+    /* Call Fortran routine to compute r = b - A*x  on this patch; store
+    results in proper location in r.   */
+
+    int patch_num, level;
+
+    fclaw2d_patch_get_info(glob->domain,
+                           this_patch, this_block_idx, this_patch_idx,
+                           &patch_num, &level);
+
+}
+
+
+
 void amg_compute_residual(fclaw2d_global_t *glob, double * q, double *r)
 {
     /* Iterate over all patches to fill patches with data from q */
