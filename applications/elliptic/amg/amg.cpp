@@ -30,6 +30,9 @@
 #include <fclaw2d_clawpatch_options.h>
 #include <fclaw2d_clawpatch.h>
 
+#include <fc2d_clawpack46_options.h>
+#include <fc2d_clawpack46.h>
+
 static int s_user_options_package_id = -1;
 
 static void *
@@ -48,21 +51,6 @@ amg_register (user_options_t *user, sc_options_t * opt)
     user->is_registered = 1;
 
     return NULL;
-}
-
-static fclaw_exit_type_t
-amg_postprocess(user_options_t *user)
-{
-    /* nothing to post-process yet ... */
-    return FCLAW_NOEXIT;
-}
-
-
-static fclaw_exit_type_t
-amg_check (user_options_t *user)
-{
-    /* Nothing to check ? */
-    return FCLAW_NOEXIT;
 }
 
 static void
@@ -86,38 +74,6 @@ options_register (fclaw_app_t * app, void *package, sc_options_t * opt)
     return amg_register(user,opt);
 }
 
-static fclaw_exit_type_t
-options_postprocess (fclaw_app_t * a, void *package, void *registered)
-{
-    FCLAW_ASSERT (a != NULL);
-    FCLAW_ASSERT (package != NULL);
-    FCLAW_ASSERT (registered == NULL);
-
-    /* errors from the key-value options would have showed up in parsing */
-    user_options_t *user = (user_options_t *) package;
-
-    /* post-process this package */
-    FCLAW_ASSERT(user->is_registered);
-
-    /* Convert strings to arrays */
-    return amg_postprocess (user);
-}
-
-
-static fclaw_exit_type_t
-options_check(fclaw_app_t *app, void *package,void *registered)
-{
-    user_options_t           *user;
-
-    FCLAW_ASSERT (app != NULL);
-    FCLAW_ASSERT (package != NULL);
-    FCLAW_ASSERT(registered == NULL);
-
-    user = (user_options_t*) package;
-
-    return amg_check(user);
-}
-
 static void
 options_destroy (fclaw_app_t * app, void *package, void *registered)
 {
@@ -139,8 +95,8 @@ options_destroy (fclaw_app_t * app, void *package, void *registered)
 static const fclaw_app_options_vtable_t options_vtable_user =
 {
     options_register,
-    options_postprocess,
-    options_check,
+    NULL,
+    NULL,
     options_destroy
 };
 
@@ -184,8 +140,6 @@ fclaw2d_domain_t* create_domain(sc_MPI_Comm mpicomm, fclaw_options_t* gparms)
     fclaw2d_domain_t         *domain;
     fclaw2d_map_context_t    *cont = NULL;
 
-    /* Map unit square to disk using mapc2m_disk.f */
-    gparms->manifold = 0;
     conn = p4est_connectivity_new_unitsquare();
     cont = fclaw2d_map_new_nomap();
 
@@ -198,14 +152,10 @@ fclaw2d_domain_t* create_domain(sc_MPI_Comm mpicomm, fclaw_options_t* gparms)
 static
 void run_program(fclaw2d_global_t* glob)
 {
-    const user_options_t           *user_opt;
-
     /* ---------------------------------------------------------------
        Set domain data.
        --------------------------------------------------------------- */
     fclaw2d_domain_data_new(glob->domain);
-
-    user_opt = amg_get_options(glob);
 
     /* Initialize virtual table for ForestClaw */
     fclaw2d_vtable_initialize();
@@ -213,12 +163,17 @@ void run_program(fclaw2d_global_t* glob)
 
     amg_link_solvers(glob);
 
+    /* Borrow Clawpack 4.6 routines for now. */
+    fc2d_clawpack46_vtable_initialize();
+
     /* ---------------------------------------------------------------
        Solve elliptic problem
        --------------------------------------------------------------- */
-    fclaw2d_initialize(glob);
+#if 0    
+    fclaw2d_initialize(glob);  /* Create initial refinement based on RHS */
     fclaw2d_run(glob);
     fclaw2d_finalize(glob);
+#endif    
 }
 
 int
@@ -232,6 +187,7 @@ main (int argc, char **argv)
     sc_options_t                *options;
     user_options_t              *user_opt;
     fclaw_options_t             *fclaw_opt;
+    fc2d_clawpack46_options_t   *claw46_opt;
     fclaw2d_clawpatch_options_t *clawpatch_opt;
 
     fclaw2d_global_t            *glob;
@@ -246,6 +202,7 @@ main (int argc, char **argv)
     /* Create new options packages */
     fclaw_opt =                   fclaw_options_register(app,"fclaw_options.ini");
     clawpatch_opt =   fclaw2d_clawpatch_options_register(app,"fclaw_options.ini");
+    claw46_opt =        fc2d_clawpack46_options_register(app,"fclaw_options.ini");
     user_opt =                    amg_options_register(app,"fclaw_options.ini");  
 
     /* Read configuration file(s) and command line, and process options */
@@ -264,7 +221,8 @@ main (int argc, char **argv)
     /* Store option packages in glob */
     fclaw2d_options_store           (glob, fclaw_opt);
     fclaw2d_clawpatch_options_store (glob, clawpatch_opt);
-    amg_options_store              (glob, user_opt);
+    fc2d_clawpack46_options_store   (glob, claw46_opt);
+    amg_options_store               (glob, user_opt);
 
     /* Run the program */
     if (!retval & !vexit)

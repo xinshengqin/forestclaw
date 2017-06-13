@@ -47,14 +47,18 @@ typedef struct user_options
 
 } user_options_t;
 
-#define AMG_SETPROB FCLAW_F77_FUNC(amg_setprob, AMG_SETPROB)
-void AMG_SETPROB(double* tperiod);
-
 void amg_link_solvers(fclaw2d_global_t *glob);
 
-void amg_problem_setup(fclaw2d_global_t* glob);
-
 const user_options_t* amg_get_options(fclaw2d_global_t* glob);
+
+#define AMG_FILL_PATCH FCLAW_F77_FUNC(amg_fill_patch,AMG_FILL_PATCH)
+
+void AMG_FILL_PATCH(int *mx, int *my, int *mbc, double q[], double u[]);
+
+#define AMG_COMPUTE_RESIDUAL FCLAW_F77_FUNC(amg_compute_residual,AMG_COMPUTE_RESIDUAL)
+
+void AMG_COMPUTE_RESIDUAL(int *mx, int *my, int *mbc, double *xlower, double *ylower,
+                          double *dx, double *dy, double u[], double r[]);
 
 /* Mappings */
 fclaw2d_map_context_t* fclaw2d_map_new_nomap();
