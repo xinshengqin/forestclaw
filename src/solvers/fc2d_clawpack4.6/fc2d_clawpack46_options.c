@@ -30,15 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_options.h>
 #include <fclaw_package.h>
 
-
-#ifdef __cplusplus
-extern "C"
-{
-#if 0
-}   
-#endif
-#endif
-
 static int s_clawpack46_options_package_id = -1;
 
 static void*
@@ -54,8 +45,8 @@ clawpack46_register (fc2d_clawpack46_options_t* clawopt, sc_options_t * opt)
     sc_options_add_bool (opt, 0, "src_term", &clawopt->src_term, 0,
                          "[clawpack46] Source term option [F]");
 
-    sc_options_add_bool (opt, 0, "use_fwaves", &clawopt->use_fwaves, 0,
-                         "[clawpack46] Use fwaves flux-form [F]");
+    sc_options_add_bool (opt, 0, "use-fwaves", &clawopt->use_fwaves, 0,
+                         "[clawpack46] Use fwave flux-form [F]");
 
 
     sc_options_add_int (opt, 0, "mwaves", &clawopt->mwaves, 1,
@@ -108,11 +99,13 @@ clawpack46_check(fc2d_clawpack46_options_t *clawopt,
     clawopt->method[5] = clawopt->mcapa;
     clawopt->method[6] = clawpatch_opt->maux;
 
+#if 0
     if (clawopt->use_fwaves)
     {
         fclaw_global_essentialf("clawpack46 : fwaves not yet implemented\n");
         return FCLAW_EXIT_QUIET;
     }
+#endif    
 
     if (clawpatch_opt->maux == 0 && clawopt->mcapa > 0)
     {
@@ -180,7 +173,8 @@ options_check (fclaw_app_t * app, void *package, void *registered)
     clawopt = (fc2d_clawpack46_options_t*) package;
     FCLAW_ASSERT (clawopt->is_registered);
 
-    clawpatch_opt = fclaw_app_get_attribute(app,"clawpatch",NULL);
+    clawpatch_opt = (fclaw2d_clawpatch_options_t *)
+        fclaw_app_get_attribute(app,"clawpatch",NULL);
     FCLAW_ASSERT(clawpatch_opt->is_registered);
 
     return clawpack46_check(clawopt,clawpatch_opt);    
@@ -239,12 +233,3 @@ void fc2d_clawpack46_options_store (fclaw2d_global_t* glob, fc2d_clawpack46_opti
     int id = fclaw_package_container_add_pkg(glob,clawopt);
     s_clawpack46_options_package_id = id;
 }
-
-
-
-#ifdef __cplusplus
-#if 0
-{
-#endif
-}
-#endif

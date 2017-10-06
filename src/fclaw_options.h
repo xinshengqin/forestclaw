@@ -48,9 +48,6 @@ typedef struct fclaw_options fclaw_options_t;
 fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
                                          const char *configfile);
 
-fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
-                                         const char *configfile);
-
 /* These can be called from external routines (in torthem, for example?) */
 fclaw_exit_type_t 
 fclaw_options_postprocess (fclaw_options_t * fclaw_opt);
@@ -59,8 +56,6 @@ fclaw_exit_type_t
 fclaw_options_check (fclaw_options_t * fclaw_opt);
 
 void fclaw_options_destroy(fclaw_options_t* fclaw_opt);
-
-
 
 
 
@@ -193,6 +188,7 @@ struct fclaw_options
     const char *tikz_figsize_string;
     double *tikz_figsize;  /* In inches, e.g. [8,2] */
 
+    int tikz_plot_fig;
     const char *tikz_plot_prefix;  /* For plotting */
     const char *tikz_plot_suffix;  /* For plotting */
 

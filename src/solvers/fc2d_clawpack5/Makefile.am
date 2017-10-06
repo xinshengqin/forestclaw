@@ -2,8 +2,9 @@
 libclawpack5_generated_headers =
 libclawpack5_installed_headers = \
 	src/solvers/fc2d_clawpack5/fc2d_clawpack5.h \
+	src/solvers/fc2d_clawpack5/fc2d_clawpack5_options.h \
 	src/solvers/fc2d_clawpack5/clawpack5_user_fort.h \
-	src/solvers/fc2d_clawpack5/fc2d_clawpack5_options.h
+	src/solvers/fc2d_clawpack5/fc2d_clawpack5_fort.h
 
 libclawpack5_compiled_sources = \
 	src/solvers/fc2d_clawpack5/fc2d_clawpack5.cpp \
@@ -22,7 +23,7 @@ libclawpack5_compiled_sources = \
 	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_average.f \
 	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_copy.f \
 	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_interpolate.f \
-	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_ghostpack_qarea.f \
+	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_local_ghost_pack.f \
 	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_diagnostics.f \
 	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_tag4refinement.f \
 	src/solvers/fc2d_clawpack5/fclaw2d_source/fc2d_clawpack5_tag4coarsening.f \
