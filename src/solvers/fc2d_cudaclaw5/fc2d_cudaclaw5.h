@@ -98,33 +98,29 @@ typedef void (*cudaclaw5_fort_src2_t)(const int* meqn,
                                       const double* dt);
 
 
-typedef void (*cudaclaw5_fort_rpn2_t)(const int* ixy,const int* maxm, const int* meqn,
-                                      const int* mwaves, const int* maux,
-                                      const int* mbc,const int* mx,
-                                      double ql[], double qr[], double auxl[], double auxr[],
-                                      double wave[], double s[],double amdq[], double apdq[]);
+typedef void (*cudaclaw5_rpn2_t)(const int* ixy,const int* maxm, const int* meqn,
+                                 const int* mwaves, const int* maux,
+                                 const int* mbc,const int* mx,
+                                 double ql[], double qr[], double auxl[], double auxr[],
+                                 double wave[], double s[],double amdq[], double apdq[]);
 
-typedef void (*cudaclaw5_fort_rpt2_t)(const int* ixy, const int* imp, const int* maxm, const int* meqn,
-                                       const int* mwaves, const int* maux, const int* mbc,const int* mx,
-                                       double ql[], double qr[], double aux1[], double aux2[],
-                                       double aux3[],  double asdq[],
-                                       double bmasdq[], double bpasdq[]);
+typedef void (*cudaclaw5_rpt2_t)(const int* ixy, const int* imp, const int* maxm, const int* meqn,
+                                 const int* mwaves, const int* maux, const int* mbc,const int* mx,
+                                 double ql[], double qr[], double aux1[], double aux2[],
+                                 double aux3[],  double asdq[],
+                                 double bmasdq[], double bpasdq[]);
+    
 
-
-typedef void (*cudaclaw5_fort_flux2_t)(const int* ixy,const int* maxm, const int* meqn,
-                                        const int* maux,const int* mbc,const int* mx,
-                                        double q1d[], double dtdx1d[],
-                                        double aux1[], double aux2[], double aux3[],
-                                        double faddm[],double faddp[], double gaddm[],
-                                        double gaddp[],double cfl1d[], double wave[],
-                                        double s[], double amdq[],double apdq[],double cqxx[],
-                                        double bmasdq[], double bpasdq[],
-                                        cudaclaw5_fort_rpn2_t rpn2,
-                                        cudaclaw5_fort_rpt2_t rpt2);
-
-typedef void (*cudaclaw5_fort_fluxfun_t)(const int* meqn, double q[], double aux[],
-                                          double fq[]);
-
+typedef void (*cudaclaw5_flux2_t)(const int* ixy,const int* maxm, const int* meqn,
+                                  const int* maux,const int* mbc,const int* mx,
+                                  double q1d[], double dtdx1d[],
+                                  double aux1[], double aux2[], double aux3[],
+                                  double faddm[],double faddp[], double gaddm[],
+                                  double gaddp[],double cfl1d[], double wave[],
+                                  double s[], double amdq[],double apdq[],double cqxx[],
+                                  double bmasdq[], double bpasdq[],
+                                  cudaclaw5_fort_rpn2_t rpn2,
+                                  cudaclaw5_fort_rpt2_t rpt2);
 
 /* ------------------------------------- Virtual table -------------------------------- */
 
@@ -142,9 +138,8 @@ typedef struct fc2d_cudaclaw5_vtable
     cudaclaw5_fort_b4step2_t   fort_b4step2;
     cudaclaw5_fort_src2_t      fort_src2;
 
-    cudaclaw5_fort_rpn2_t      fort_rpn2;
-    cudaclaw5_fort_rpt2_t      fort_rpt2;
-    cudaclaw5_fort_fluxfun_t   fort_fluxfun;
+    cudaclaw5_cuda_rpn2_t      cuda_rpn2;
+    cudaclaw5_cuda_rpt2_t      cuda_rpt2;
 
     int is_set;
 } fc2d_cudaclaw5_vtable_t;
@@ -195,6 +190,16 @@ void fc2d_cudaclaw5_src2(struct fclaw2d_global *glob,
                          int this_patch_idx,
                          double t,
                          double dt);
+
+
+__global__  void cudaclaw5_step2_GPU(int mx,int my,int meqn,int maux,int mbc,
+                                     double *qold, double *aux, double dx,
+                                     double dy,double dt, double cflgrid,
+                                     double fm[], double fp[], 
+                                     double gm[],double gp[], 
+                                     cudaclaw5_rpn2_t cuda_rpn2,
+                                     cudaclaw5_rpt2_t cuda_rpt2, 
+                                     cudaclaw5_flux2_t cuda_flux2);
 
 
 #ifdef __cplusplus

@@ -36,6 +36,10 @@ extern "C"
 #endif
 #endif
 
+#if 0
+/* to get syntax highlighting right */    
+#endif    
+
 /* -------------------------------- Clawpack functions ------------------------------- */
 
 
@@ -58,7 +62,7 @@ void CUDACLAW5_FLUX2(const int* ixy,const int* maxm, const int* meqn,
                       double gaddp[],double cfl1d[], double wave[],
                       double s[], double amdq[],double apdq[],double cqxx[],
                       double bmasdq[], double bpasdq[],
-                      cudaclaw5_fort_rpn2_t rpn2, cudaclaw5_fort_rpt2_t rpt2);
+                      cudaclaw5_rpn2_t rpn2, cudaclaw5_rpt2_t rpt2);
 #if 0
 #define CUDACLAW5_FLUX2FW FCLAW_F77_FUNC(cudaclaw5_flux2fw,CUDACLAW5_FLUX2FW)
 void CUDACLAW5_FLUX2FW(const int* ixy,const int* maxm, const int* meqn, //
@@ -82,7 +86,7 @@ void CUDACLAW5_SET_CAPACITY(const int* mx, const int *my, const int *mbc,
 
 /* ------------------------------ Time stepping functions ---------------------------- */
 
-
+#if 0
 #define CUDACLAW5_STEP2_WRAP FCLAW_F77_FUNC(cudaclaw5_step2_wrap,CUDACLAW5_STEP2_WRAP)
 void CUDACLAW5_STEP2_WRAP(const int* maxm, const int* meqn, const int* maux,
                             const int* mbc, const int method[], const int mthlim[],
@@ -107,6 +111,7 @@ void CUDACLAW5_STEP2(const int* maxm, const int* meqn, const int* maux,
                             double gp[],
                             cudaclaw5_fort_rpn2_t rpn2,
                             cudaclaw5_fort_rpt2_t rpt2);
+#endif                            
 
 /* ----------------------------- Misc ClawPack specific functions ------------------------------ */
     

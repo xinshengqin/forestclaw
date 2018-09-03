@@ -79,16 +79,6 @@ c
 
 c     # Include four additional arguments to avoid need for
 c     # global array
-c      call cudaclaw5_step2(maxm,maxmx,maxmy,meqn,maux, mbc,
-c     &      mx,my, qold,aux,dx,dy,dt,
-c     &      cfl,fm,fp,gm,gp,
-c     &      work(i0faddm),work(i0faddp),
-c     &      work(i0gaddm),work(i0gaddp),
-c     &      work(i0q1d),work(i0dtdx1),work(i0dtdy1),
-c     &      work(i0aux1),work(i0aux2),work(i0aux3),
-c     &      work(i0next),mwork1,rpn2,rpt2,flux2,
-c     &      mwaves,mcapa,method,mthlim,block_corner_count,ierror)
-
       call cudaclaw5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,
      &      dx,dy,dt,cfl,fm,fp,gm,gp,rpn2,rpt2,
      &      block_corner_count,ierror)
