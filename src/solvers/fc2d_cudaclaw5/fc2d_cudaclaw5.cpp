@@ -275,17 +275,18 @@ double cudaclaw5_step2(fclaw2d_global_t *glob,
 
     double cflgrid = 0.0;
 
-#if 0
-    int mwork = (maxm+2*mbc)*(12*meqn + (meqn+1)*mwaves + 3*maux + 2);
-    double* work = new double[mwork];
-#endif    
-
     int ierror = 0;
     //fc2d_cudaclaw5_flux2_t flux2 = cudaclaw_options->use_fwaves ?
     //                                CUDACLAW5_FLUX2FW : CUDACLAW5_FLUX2;
     cudaclaw5_flux2_t flux2 = CUDACLAW5_FLUX2;
-    // int* block_corner_count = fclaw2d_patch_block_corner_count(glob,this_patch);
+
+#if 0
+    /* Needed for handling corners in cubed sphere;  We can handle this later.  */
+    int* block_corner_count = fclaw2d_patch_block_corner_count(glob,this_patch);
+#endif    
     int* block_corner_count = NULL;
+    
+
     cudaclaw5_step2_wrap(mx,my,meqn, maux, mbc, cudaclaw_options->method,
                          cudaclaw_options->mthlim, cudaclaw_options->mcapa,
                          mwaves,qold, aux, dx, dy, dt, cflgrid,

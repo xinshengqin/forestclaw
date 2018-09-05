@@ -1,4 +1,4 @@
-__global__  void cudaclaw5_step2_GPU(int mx,int my,int meqn,int maux,int mbc,
+__device__  void cudaclaw5_step2_GPU(int mx,int my,int meqn,int maux,int mbc,
                                      double *qold, double *aux, double dx,
                                      double dy,double dt, double cflgrid,
                                      double fm[], double fp[], 
