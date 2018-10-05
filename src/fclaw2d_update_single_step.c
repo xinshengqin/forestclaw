@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_global.h>
 #include <fclaw2d_domain.h>
 #include <fclaw2d_patch.h>
+#include <fc2d_cuda_profiler.h>
 
 static fclaw2d_patch_iterator_t patch_iterator;
 
@@ -51,6 +52,7 @@ void cb_single_step(fclaw2d_domain_t *domain,
                     int this_patch_idx,
                     void *user)
 {
+    PROFILE_CUDA_START("cb_single_step", 5);
     fclaw2d_global_iterate_t* g = (fclaw2d_global_iterate_t*) user;
 
     double maxcfl;
@@ -67,6 +69,7 @@ void cb_single_step(fclaw2d_domain_t *domain,
     ss_data->buffer_data.iter++;  /* Used for patch buffer */
     g->glob->count_single_step++;
     ss_data->maxcfl = fmax(maxcfl,ss_data->maxcfl);
+    PROFILE_CUDA_STOP;
 }
 
 
@@ -87,6 +90,7 @@ double fclaw2d_update_single_step(fclaw2d_global_t *glob,
                                   int level,
                                   double t, double dt)
 {
+    PROFILE_CUDA_START("fclaw2d_update_single_step", 6);
 
     /* Iterate over every patch at this level */
     fclaw2d_single_step_data_t ss_data;
@@ -112,5 +116,6 @@ double fclaw2d_update_single_step(fclaw2d_global_t *glob,
     /* If there are not grids at this level, we return CFL = 0 */
     patch_iterator(glob, level, cb_single_step,(void *) &ss_data);
 
+    PROFILE_CUDA_STOP;
     return ss_data.maxcfl;
 }

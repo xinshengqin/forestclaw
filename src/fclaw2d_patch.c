@@ -27,6 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw2d_global.h>
 #include <fclaw2d_domain.h>
+#include <fc2d_cuda_profiler.h>
 
 struct fclaw2d_patch_transform_data;
 
@@ -234,11 +235,13 @@ double fclaw2d_patch_single_step_update(fclaw2d_global_t *glob,
                                         double dt, 
                                         void* user)
 {
+    PROFILE_CUDA_START("fclaw2d_patch_single_step_update", 4);
     fclaw2d_patch_vtable_t *patch_vt = fclaw2d_patch_vt();
     FCLAW_ASSERT(patch_vt->single_step_update != NULL);
 
     double maxcfl = patch_vt->single_step_update(glob,this_patch,this_block_idx,
                                                    this_patch_idx,t,dt, user);
+    PROFILE_CUDA_STOP;
     return maxcfl;
 }
 

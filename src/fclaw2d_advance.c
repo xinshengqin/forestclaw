@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_update_single_step.h>
 #include <fclaw2d_options.h>
 #include <fclaw2d_global.h>
+#include <fc2d_cuda_profiler.h>
 
 
 
@@ -176,9 +177,11 @@ double update_level_solution(fclaw2d_global_t *glob,
                              int level,
                              double t, double dt)
 {
+    PROFILE_CUDA_START("update_level_solution", 7);
     /* There might not be any grids at this level */
     double cfl = fclaw2d_update_single_step(glob,level,t,dt);
 
+    PROFILE_CUDA_STOP;
     return cfl;
 }
 
@@ -189,6 +192,10 @@ double advance_level(fclaw2d_global_t *glob,
                      double maxcfl,
                      fclaw2d_timestep_counters* ts_counter)
 {
+
+    char _profile_name[20];
+    sprintf(_profile_name, "advance_level: %d", level);
+    PROFILE_CUDA_START(_profile_name, level+9);
     fclaw2d_domain_t* domain = glob->domain;
     const fclaw_options_t* gparms = fclaw2d_get_options(glob);
     double t_level = ts_counter[level].current_time;
@@ -235,6 +242,7 @@ double advance_level(fclaw2d_global_t *glob,
     fclaw_global_infof("Advance on level %d done at time %12.6e\n\n",
                        level,ts_counter[level].current_time);
 
+    PROFILE_CUDA_STOP;
     return maxcfl;  /* Maximum from level iteration */
 }
 
@@ -245,6 +253,7 @@ double advance_level(fclaw2d_global_t *glob,
 double fclaw2d_advance_all_levels(fclaw2d_global_t *glob,
                                   double t_curr, double dt)
 {
+    PROFILE_CUDA_START("fclaw2d_advance_all_levels", 9);
     fclaw2d_domain_t* domain = glob->domain;
 
     int level;
@@ -328,5 +337,6 @@ double fclaw2d_advance_all_levels(fclaw2d_global_t *glob,
     /* Count the number of times that advance is called */
     ++glob->count_amr_advance;
 
+    PROFILE_CUDA_STOP;
     return maxcfl;
 }
