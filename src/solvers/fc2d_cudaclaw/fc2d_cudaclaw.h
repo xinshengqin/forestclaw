@@ -38,6 +38,14 @@ extern "C"
 #endif
 
 #define FC2D_CUDACLAW_BUFFER_LEN 100
+#define NUM_STREAMS 10
+
+extern cudaclaw_fluxes_t* s_array_fluxes_struct_dev[NUM_STREAMS];
+extern cudaclaw_fluxes_t* s_array_fluxes_struct[NUM_STREAMS];
+extern double* s_membuffer[NUM_STREAMS];
+extern double* s_membuffer_dev[NUM_STREAMS];
+
+extern int batch_iter;
 
 struct fclaw2d_global;
 struct fclaw2d_patch;
@@ -163,7 +171,6 @@ double cudaclaw_step2(struct fclaw2d_global* glob,
                       double dt);
 
 double cudaclaw_step2_batch(struct fclaw2d_global* glob,
-                            struct cudaclaw_fluxes* fluxes_array,
                             int patch_buffer_len, double t, double dt);
 
 void fc2d_cudaclaw_store_buffer(struct fclaw2d_global* glob,
@@ -175,6 +182,8 @@ void fc2d_cudaclaw_store_buffer(struct fclaw2d_global* glob,
 void cudaclaw_allocate_buffers(struct fclaw2d_global *glob);
 
 void cudaclaw_deallocate_buffers(struct fclaw2d_global *glob);
+
+void cudaclaw_create_streams();
 
 
 /* --------------------------------- Virtual table ------------------------------------ */

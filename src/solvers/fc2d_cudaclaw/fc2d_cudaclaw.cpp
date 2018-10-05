@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "cuda_source/cudaclaw_allocate.h"
 #include <fc2d_cuda_profiler.h>
+#include "cuda_runtime_api.h"
+#include "fc2d_cudaclaw_check.cu"
 
 static fc2d_cudaclaw_vtable_t s_cudaclaw_vt;
 
@@ -299,12 +301,12 @@ double cudaclaw_update(fclaw2d_global_t *glob,
     }
 #endif
     fclaw2d_timer_start (&glob->timers[FCLAW2D_TIMER_ADVANCE_STEP2]);  
-    if (iter == 0)
-    {
-        /* Create array to store pointers to patch data */
-        buffer_data->user = FCLAW_ALLOC(cudaclaw_fluxes_t,
-                                        patch_buffer_len*sizeof(cudaclaw_fluxes_t));
-    }  
+    // if (iter == 0)
+    // {
+    //     /* Create array to store pointers to patch data */
+    //     buffer_data->user = FCLAW_ALLOC(cudaclaw_fluxes_t,
+    //                                     patch_buffer_len*sizeof(cudaclaw_fluxes_t));
+    // }  
 
     /* Be sure to save current step! */
     fclaw2d_clawpatch_save_current_step(glob, this_patch);
@@ -312,24 +314,24 @@ double cudaclaw_update(fclaw2d_global_t *glob,
 
     /* Memcopy data to qold_dev, aux_dev;  store pointer to fluxes */
     fc2d_cudaclaw_store_buffer(glob,this_patch,this_patch_idx,total,
-                              iter, (cudaclaw_fluxes_t*) buffer_data->user);
+                              iter, (cudaclaw_fluxes_t*) s_array_fluxes_struct[batch_iter%NUM_STREAMS]);
 
     maxcfl = 0;
     if ((iter+1) % patch_buffer_len == 0)
     {
-        maxcfl = cudaclaw_step2_batch(glob,(cudaclaw_fluxes_t*) buffer_data->user,
+        maxcfl = cudaclaw_step2_batch(glob,
                                       patch_buffer_len,t,dt);
     }
     else if (iter == total-1)
     {
-        maxcfl = cudaclaw_step2_batch(glob,(cudaclaw_fluxes_t*) buffer_data->user,
+        maxcfl = cudaclaw_step2_batch(glob,
                                       total%patch_buffer_len,t,dt);        
     }
 
-    if (iter == total-1)
-    {
-        FCLAW_FREE(buffer_data->user);
-    }
+    // if (iter == total-1)
+    // {
+    //     FCLAW_FREE(buffer_data->user);
+    // }
 
     fclaw2d_timer_stop (&glob->timers[FCLAW2D_TIMER_ADVANCE_STEP2]);       
 
@@ -339,6 +341,28 @@ double cudaclaw_update(fclaw2d_global_t *glob,
                         this_patch,
                         this_block_idx,
                         this_patch_idx,t,dt);
+    }
+
+    if (iter == total-1)
+    {
+        // TODO: Here we assume num_batch < NUM_STREAMS during the entire run.
+        CHECK(cudaDeviceSynchronize());
+        PROFILE_CUDA_GROUP("Copy back to patches loop",2);
+        int num_batch = total/FC2D_CUDACLAW_BUFFER_LEN+1 ;
+        for (int ib = 0; ib < num_batch; ++ib)
+        {
+            /* -------------------------- Copy q back to host ----------------------------------*/ 
+            cudaclaw_fluxes_t* array_fluxes_struct = s_array_fluxes_struct[batch_iter%NUM_STREAMS];
+            for (int i = 0; i < FC2D_CUDACLAW_BUFFER_LEN; ++i)    
+            {     
+                cudaclaw_fluxes_t* fluxes = &(array_fluxes_struct[i]);
+                int I_q = i*fluxes->num;
+
+                memcpy(fluxes->qold,&s_membuffer[batch_iter%NUM_STREAMS][I_q],fluxes->num_bytes);
+
+            }        
+        }
+
     }
     return maxcfl;
 }
